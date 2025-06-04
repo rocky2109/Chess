@@ -2,14 +2,57 @@ const socket = io();
 const game = new Chess();
 let board = null;
 let playerColor = 'white';
+let gameMode = null; // 'friend' or 'bot'
+let gameId = null;
+let botDifficulty = 'medium'; // easy, medium, hard
 
-function onDragStart(source, piece, position, orientation) {
+// Initialize chessboard
+function initBoard() {
+    const config = {
+        draggable: true,
+        position: 'start',
+        onDragStart: onDragStart,
+        onDrop: onDrop,
+        onSnapEnd: onSnapEnd
+    };
+    board = Chessboard('board', config);
+}
+
+// Game mode selection
+document.getElementById('playFriend').addEventListener('click', () => {
+    gameMode = 'friend';
+    document.getElementById('gameArea').style.display = 'block';
+    document.querySelector('.game-mode').style.display = 'none';
+    document.getElementById('friendCode').style.display = 'block';
+    socket.emit('join', { mode: 'friend' });
+});
+
+document.getElementById('playBot').addEventListener('click', () => {
+    gameMode = 'bot';
+    playerColor = 'white'; // Player always white vs bot
+    document.getElementById('gameArea').style.display = 'block';
+    document.querySelector('.game-mode').style.display = 'none';
+    initBoard();
+    updateStatus();
+    document.getElementById('turn').textContent = 'Your turn (vs Computer)';
+});
+
+document.getElementById('copyCode').addEventListener('click', () => {
+    const codeInput = document.getElementById('gameCode');
+    codeInput.select();
+    document.execCommand('copy');
+    alert('Game code copied!');
+});
+
+// Chess move handlers
+function onDragStart(source, piece) {
     if (game.game_over()) return false;
     if ((game.turn() === 'w' && piece.search(/^b/) !== -1) ||
         (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
         return false;
     }
-    if (playerColor !== game.turn()) return false;
+    if (gameMode === 'bot' && game.turn() !== playerColor) return false;
+    if (gameMode === 'friend' && game.turn() !== playerColor) return false;
 }
 
 function onDrop(source, target) {
@@ -22,7 +65,12 @@ function onDrop(source, target) {
 
         if (move === null) return 'snapback';
         
-        socket.emit('move', move);
+        if (gameMode === 'friend') {
+            socket.emit('move', { gameId, move });
+        } else if (gameMode === 'bot') {
+            setTimeout(makeBotMove, 500);
+        }
+        
         updateStatus();
     } catch (e) {
         return 'snapback';
@@ -33,6 +81,21 @@ function onSnapEnd() {
     board.position(game.fen());
 }
 
+// Bot move logic
+function makeBotMove() {
+    if (game.game_over()) return;
+    
+    // Simple bot logic - replace with chess-bot.js implementation
+    const moves = game.moves();
+    if (moves.length > 0) {
+        const move = moves[Math.floor(Math.random() * moves.length)];
+        game.move(move);
+        board.position(game.fen());
+        updateStatus();
+    }
+}
+
+// Update game status
 function updateStatus() {
     let status = '';
     let moveColor = 'White';
@@ -50,17 +113,23 @@ function updateStatus() {
     }
 
     document.getElementById('status').textContent = status;
-    document.getElementById('turn').textContent = game.turn() === playerColor ? 'Your turn' : 'Waiting for opponent';
+    
+    if (gameMode === 'friend') {
+        document.getElementById('turn').textContent = game.turn() === playerColor ? 'Your turn' : 'Opponent\'s turn';
+    }
 }
 
+// Socket.io events
 socket.on('connect', () => {
     console.log('Connected to server');
-    socket.emit('join');
 });
 
-socket.on('color', (color) => {
-    playerColor = color;
-    document.getElementById('turn').textContent = 'You are ' + color;
+socket.on('gameCreated', (data) => {
+    gameId = data.gameId;
+    playerColor = data.color;
+    document.getElementById('gameCode').value = gameId;
+    initBoard();
+    updateStatus();
 });
 
 socket.on('gameState', (fen) => {
@@ -76,15 +145,14 @@ socket.on('move', (move) => {
 });
 
 document.getElementById('reset').addEventListener('click', () => {
-    socket.emit('reset');
+    game.reset();
+    board.position('start');
+    updateStatus();
+    
+    if (gameMode === 'friend') {
+        socket.emit('reset', { gameId });
+    } else if (gameMode === 'bot') {
+        playerColor = 'white';
+        document.getElementById('turn').textContent = 'Your turn (vs Computer)';
+    }
 });
-
-const config = {
-    draggable: true,
-    position: 'start',
-    onDragStart: onDragStart,
-    onDrop: onDrop,
-    onSnapEnd: onSnapEnd
-};
-
-board = Chessboard('board', config);
