@@ -65,3 +65,39 @@ button {
 button:hover {
     background-color: #45a049;
 }
+/* Add these to your existing CSS */
+.game-mode {
+    margin: 20px 0;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.game-mode button {
+    padding: 15px 25px;
+    font-size: 18px;
+}
+
+#friendCode {
+    margin: 15px 0;
+    padding: 10px;
+    background: #f0f0f0;
+    border-radius: 5px;
+}
+
+#gameCode {
+    padding: 8px;
+    margin: 0 10px;
+    width: 100px;
+    text-align: center;
+    font-weight: bold;
+}
+
+#copyCode {
+    padding: 8px 15px;
+    background: #4a6baf;
+}
+
+#copyCode:hover {
+    background: #3a5a9f;
+}
