@@ -11,11 +11,22 @@
 <body>
     <div class="container">
         <h1>Online Chess</h1>
-        <div id="board"></div>
-        <div class="info">
-            <p id="status">Waiting for opponent...</p>
-            <p id="turn"></p>
-            <button id="reset">New Game</button>
+        <div class="game-mode">
+            <button id="playFriend">Play with Friend</button>
+            <button id="playBot">Play vs Computer</button>
+        </div>
+        <div id="gameArea" style="display:none;">
+            <div id="board"></div>
+            <div class="info">
+                <p id="status">Select game mode</p>
+                <p id="turn"></p>
+                <div id="friendCode" style="display:none;">
+                    <p>Share this code with your friend:</p>
+                    <input type="text" id="gameCode" readonly>
+                    <button id="copyCode">Copy</button>
+                </div>
+                <button id="reset">New Game</button>
+            </div>
         </div>
     </div>
     <script src="script.js"></script>
