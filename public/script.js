@@ -2,9 +2,8 @@ const socket = io();
 const game = new Chess();
 let board = null;
 let playerColor = 'white';
-let gameMode = null; // 'friend' or 'bot'
+let gameMode = null;
 let gameId = null;
-let botDifficulty = 'medium'; // easy, medium, hard
 
 // Initialize chessboard
 function initBoard() {
@@ -29,7 +28,7 @@ document.getElementById('playFriend').addEventListener('click', () => {
 
 document.getElementById('playBot').addEventListener('click', () => {
     gameMode = 'bot';
-    playerColor = 'white'; // Player always white vs bot
+    playerColor = 'white';
     document.getElementById('gameArea').style.display = 'block';
     document.querySelector('.game-mode').style.display = 'none';
     initBoard();
@@ -41,7 +40,7 @@ document.getElementById('copyCode').addEventListener('click', () => {
     const codeInput = document.getElementById('gameCode');
     codeInput.select();
     document.execCommand('copy');
-    alert('Game code copied!');
+    alert('Game code copied! Share it with your friend.');
 });
 
 // Chess move handlers
@@ -81,11 +80,10 @@ function onSnapEnd() {
     board.position(game.fen());
 }
 
-// Bot move logic
+// Simple bot move logic
 function makeBotMove() {
     if (game.game_over()) return;
     
-    // Simple bot logic - replace with chess-bot.js implementation
     const moves = game.moves();
     if (moves.length > 0) {
         const move = moves[Math.floor(Math.random() * moves.length)];
