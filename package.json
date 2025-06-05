@@ -2,11 +2,19 @@
   "name": "chess-game",
   "version": "1.0.0",
   "scripts": {
-    "start": "node server.js"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
   },
   "dependencies": {
     "chess.js": "^0.13.4",
-    "express": "^4.18.2",
+    "next": "^12.1.0",
     "socket.io": "^4.5.1"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.35",
+    "@types/react": "^18.0.9",
+    "@types/react-dom": "^18.0.5",
+    "typescript": "^4.7.2"
   }
 }
