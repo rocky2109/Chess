@@ -36,7 +36,6 @@ export default function handler(req, res) {
 
             socket.on('disconnect', () => {
                 console.log('Client disconnected');
-                // Clean up games
                 for (const id in games) {
                     games[id].sockets = games[id].sockets.filter(s => s !== socket.id);
                     if (games[id].sockets.length === 0) {
@@ -46,7 +45,6 @@ export default function handler(req, res) {
             });
 
             function handleFriendGame(socket) {
-                // Try to find existing game waiting for player
                 for (const id in games) {
                     if (games[id].players < 2) {
                         joinGame(socket, id, 'black');
@@ -54,7 +52,6 @@ export default function handler(req, res) {
                     }
                 }
 
-                // Create new game
                 const newGameId = generateGameId();
                 games[newGameId] = {
                     fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
@@ -77,5 +74,14 @@ export default function handler(req, res) {
             }
         });
     }
+    
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
     res.end();
 }
+
+export const config = {
+    api: {
+        bodyParser: false
+    }
+};
